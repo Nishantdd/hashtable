@@ -2,9 +2,11 @@
 #include <math.h>
 #include <string.h>
 #include "hash_table.h"
+#include "prime.h"
 
 #define HT_PRIME_1 153
 #define HT_PRIME_2 157
+#define HT_INITIAL_BASE_SIZE 53
 
 static ht_item* ht_new_item(const char* k, const char* v){
     ht_item* i = malloc(sizeof(ht_item));
@@ -13,13 +15,17 @@ static ht_item* ht_new_item(const char* k, const char* v){
     return i;
 }
 
-ht_hash_table* ht_new(){
+static ht_hash_table* ht_new_sized(const int base_size){
     ht_hash_table* ht = malloc(sizeof(ht_hash_table));
+    ht->size = next_prime(base_size);
 
-    ht->size = 53;
     ht->count = 0;
     ht->items = calloc((size_t)ht->size, sizeof(ht_item*));
     return ht;
+}
+
+ht_hash_table* ht_new(){
+    return ht_new_sized(HT_INITIAL_BASE_SIZE);
 }
 
 static void ht_del_item(ht_item* i){
