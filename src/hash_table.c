@@ -143,7 +143,7 @@ char* ht_search(ht_hash_table* ht, const char* key){
 
 void ht_delete(ht_hash_table* ht, const char* key) {
     const int load = ht->count * 100 / ht->size;
-    if(load < 70){
+    if(load < 10){
         ht_resize_down(ht);
     }
     
