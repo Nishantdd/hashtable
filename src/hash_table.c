@@ -62,6 +62,42 @@ static int ht_get_hash(const char* s, const int num_buckets, const int attempt){
 }
 
 static ht_item HT_DELETED_ITEM = {NULL, NULL};
+static void ht_resize(ht_hash_table* ht, const int base_size){
+    if(base_size < HT_INITIAL_BASE_SIZE){
+        return;
+    }
+    ht_hash_table* new_ht = ht_new_sized(base_size);
+    for(size_t i = 0; i < ht->size; i++){
+        ht_item* item = ht->items[i];
+        if(item != NULL && item != &HT_DELETED_ITEM){
+            ht_insert(new_ht, item->key, item->value);
+        }
+    }
+
+    ht->count = new_ht->count;
+
+    const int tmp_size = ht->size;
+    ht->size = new_ht->size;
+    new_ht->size = tmp_size;
+
+    ht_item** tmp_items = ht->items;
+    ht->items = new_ht->items;
+    new_ht->items = tmp_items;
+
+    ht_del_hash_table(new_ht);
+}
+
+static void ht_resize_up(ht_hash_table* ht){
+    const int new_size = ht->size * 2;
+    ht_resize(ht, new_size);
+}
+
+
+static void ht_resize_down(ht_hash_table* ht){
+    const int new_size = ht->size / 2;
+    ht_resize(ht, new_size);
+}
+
 void ht_insert(ht_hash_table* ht, const char* key, const char* value){
     ht_item* item = ht_new_item(key, value);
     int index = ht_get_hash(item->key, ht->size, 0);
